@@ -40,6 +40,7 @@ on:
         default: true
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
@@ -218,6 +219,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
+      actions: read
       contents: write
     outputs:
       package_branch: ${{ steps.package_branch.outputs.branch }}
@@ -337,6 +339,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
+      actions: read
       contents: read
       id-token: write
     steps:
@@ -437,6 +440,7 @@ jobs:
       name: npm
       url: https://www.npmjs.com/package/@openviking/openclaw-plugin
     permissions:
+      actions: read
       contents: read
       id-token: write
     steps:
