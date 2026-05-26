@@ -1,9 +1,9 @@
 name: OpenViking OpenClaw plugin release
 
 # Publishes examples/openclaw-plugin as @openviking/openclaw-plugin. The
-# publish branch intentionally does not commit dist/; this workflow builds and
-# npm-packs the plugin into a generated package branch, then publishes the same
-# packed package to ClawHub and npm.
+# publish branch intentionally does not commit dist/; this workflow builds the
+# plugin once, publishes a legacy folder/zip-style artifact to ClawHub for old
+# OpenClaw compatibility, and publishes the npm-packed tarball to npm.
 
 on:
   workflow_dispatch:
@@ -213,7 +213,7 @@ jobs:
           echo "changelog=${{ github.event.inputs.changelog || 'OpenViking plugin release via OIDC trusted publishing.' }}"
 
   prepare-package-source:
-    name: Prepare ClawHub package source
+    name: Prepare plugin package artifacts
     needs: guard
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -294,6 +294,13 @@ jobs:
           path: ${{ steps.pack.outputs.tarball_path }}
           if-no-files-found: error
 
+      - name: Upload ClawHub legacy package folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: openviking-clawhub-legacy-package
+          path: ${{ steps.pack.outputs.package_dir }}/
+          if-no-files-found: error
+
       - name: Push generated package branch
         id: package_branch
         env:
@@ -340,6 +347,12 @@ jobs:
       - name: Install ClawHub CLI
         run: npm install -g clawhub@latest
 
+      - name: Download ClawHub legacy package folder
+        uses: actions/download-artifact@v4
+        with:
+          name: openviking-clawhub-legacy-package
+          path: ${{ runner.temp }}/openviking-clawhub-legacy-package
+
       - name: Write ClawHub token config
         env:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
@@ -371,7 +384,6 @@ jobs:
 
       - name: Publish package to ClawHub
         env:
-          SOURCE_URL: ${{ needs.prepare-package-source.outputs.source_url }}
           VERSION: ${{ needs.guard.outputs.version }}
           TAGS: ${{ needs.guard.outputs.tags }}
           SOURCE_REPO: ${{ github.repository }}
@@ -379,11 +391,22 @@ jobs:
           SOURCE_REF: ${{ needs.prepare-package-source.outputs.source_ref }}
         run: |
           set -euo pipefail
+          package_dir="$RUNNER_TEMP/openviking-clawhub-legacy-package"
+          if [ ! -f "$package_dir/package.json" ]; then
+            package_json="$(find "$package_dir" -mindepth 1 -maxdepth 3 -name package.json -print -quit)"
+            if [ -z "$package_json" ]; then
+              echo "::error title=Missing ClawHub package::The openviking-clawhub-legacy-package artifact did not contain package.json."
+              exit 1
+            fi
+            package_dir="$(dirname "$package_json")"
+          fi
+
           echo "Publishing ClawHub source metadata:"
           echo "  source_repo=$SOURCE_REPO"
           echo "  source_ref=$SOURCE_REF"
           echo "  source_commit=$SOURCE_COMMIT"
-          clawhub package publish "$SOURCE_URL" \
+          echo "  package_dir=$package_dir"
+          clawhub package publish "$package_dir" \
             --site https://clawhub.ai \
             --registry https://clawhub.ai \
             --family code-plugin \
