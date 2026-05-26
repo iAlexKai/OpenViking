@@ -17,16 +17,13 @@ enabled: true
 # upsert 表示新增或更新（默认行为）
 operation_mode: "add_only"
 content_template: |
-  {{ summary }}
+  Summary: {{ summary }}
   {{extract_context.get_first_message_time_with_weekday_from_ranges(ranges|default(''))|default('N/A')}} ChatLog:
   {{ extract_context.get_event_content(ranges, summary, 0) }}
 embedding_template: |-
-  {{ event_name }}
-
-  {{ goal }}
-
+  EventName: {{ event_name }}
+  Goal: {{ goal }}
   {{ content }}
-
 overview_template: |-
   # Events Overview
   {% if items %}**Date:** {{ extract_context.get_year(items[0].file_content.ranges|default(''))|default('') }}/{{ extract_context.get_month(items[0].file_content.ranges|default(''))|default('') }}/{{ extract_context.get_day(items[0].file_content.ranges|default(''))|default('') }}{% endif %}
