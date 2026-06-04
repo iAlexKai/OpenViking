@@ -379,7 +379,7 @@ impl ValidationFailureKind {
         match error {
             Error::Network(message) if message.contains("unhealthy") => Self::Unhealthy,
             Error::Network(_) => Self::Network,
-            Error::Api(message) if looks_like_auth_error(message) => Self::Auth,
+            Error::Api { message, .. } if looks_like_auth_error(message) => Self::Auth,
             _ => Self::Other,
         }
     }
@@ -486,7 +486,7 @@ mod tests {
 
         let plain = strip_ansi(&labels.join("\n"));
         assert!(plain.contains("local            Self-Managed      [Active]"));
-        assert!(plain.contains("cloud-799f84     Volcengine Cloud"));
+        assert!(plain.contains("cloud-799f84     VolcEngine Cloud"));
         assert_eq!(plain.matches("[Active]").count(), 1);
         assert!(!plain.contains("http://"));
         assert!(!plain.contains("https://"));

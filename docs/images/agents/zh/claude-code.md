@@ -1,10 +1,8 @@
-# Claude Code 记忆插件
-
 为 [Claude Code](https://docs.claude.com/zh-CN/docs/claude-code/overview) 提供跨项目、跨 session 的长期记忆，越用越聪明。安装一次，每次对话自动召回和捕获，模型不需要主动调用任何工具。
 
 源码：[examples/claude-code-memory-plugin](https://github.com/volcengine/OpenViking/tree/main/examples/claude-code-memory-plugin) | [博客：动机与效果展示](https://blog.openviking.ai/post/openviking-coding-agent/)
 
-## 安装
+## 步骤 1：安装
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/volcengine/OpenViking/main/examples/claude-code-memory-plugin/setup-helper/install.sh)
@@ -30,7 +28,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/volcengine/OpenViking/main/e
 
 3. **启动 Claude Code**，执行 `/mcp` 确认 OpenViking 这一项显示的是你的服务器 URL。
 
-> 还没有 `ovcli.conf`？先按 [部署指南 → CLI](../guides/03-deployment.md#cli) 创建。
+> 还没有 `ovcli.conf`？先按部署指南 → CLI 创建。
 >
 > 纯本地模式（`http://127.0.0.1:1933`，无鉴权）？跳过第 1 步——插件会静默使用本地默认值。
 >
@@ -38,7 +36,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/volcengine/OpenViking/main/e
 
 </details>
 
-## 验证
+
+## 步骤 2：验证
 
 ```bash
 type claude        # 期望输出：claude is a shell function
@@ -51,6 +50,7 @@ type claude        # 期望输出：claude is a shell function
 - `/openviking-memory:ov` → 展示服务器状态、身份、召回/注入统计和开关状态
 
 如果插件似乎没在工作，设 `OPENVIKING_DEBUG=1` 看 `~/.openviking/logs/cc-hooks.log`。
+
 
 ## 工作原理
 
@@ -76,9 +76,11 @@ type claude        # 期望输出：claude is a shell function
 
 </details>
 
+
 ## 状态行
 
 插件在 Claude Code 输入框下方渲染 OpenViking 状态：连接健康度、召回数量、捕获进度和 session 状态一目了然。完整段位说明和个性化 recipe 见 [STATUSLINE.md](https://github.com/volcengine/OpenViking/blob/main/examples/claude-code-memory-plugin/STATUSLINE.md)。
+
 
 ## 故障排查
 
@@ -89,10 +91,9 @@ type claude        # 期望输出：claude is a shell function
 | MCP 工具连到 `127.0.0.1` 而不是远程 | 缺少函数包装 | 确认 `type claude` 返回 "shell function"；见 [手动安装](#安装) |
 | 远程认证 401 / 403 | API Key 错误或缺少租户头 | 检查 `OPENVIKING_API_KEY`；多租户还要核对 `OPENVIKING_ACCOUNT` / `OPENVIKING_USER` |
 
-## 参见
+
+## 参考文档
 
 - [博客：在 Claude Code / Codex 中接入 OpenViking](https://blog.openviking.ai/post/openviking-coding-agent/) — 为什么以及如何给你的 Coding Agent 加上长期记忆
 - [插件 README](https://github.com/volcengine/OpenViking/blob/main/examples/claude-code-memory-plugin/README.md) — 完整环境变量表、hook 细节、架构图
 - [迁移说明](https://github.com/volcengine/OpenViking/blob/main/examples/claude-code-memory-plugin/MIGRATION.md) — 从旧版插件升级
-- [MCP 客户端](./06-mcp-clients.md) — MCP 工具参数与其他客户端
-- [部署指南 → CLI](../guides/03-deployment.md#cli) — `ovcli.conf` 配置
